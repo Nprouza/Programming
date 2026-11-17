@@ -10,6 +10,7 @@ SOCIAL_SECURITY_RATE = 0.062
 MEDICARE_RATE = 0.0145
 WEEKS_PER_YEAR = 52
 
+
 # Input
 employee_name = input("Employee name: ")
 hourly_rate = float(input("Hourly pay rate: "))
