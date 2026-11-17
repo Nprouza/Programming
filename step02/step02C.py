@@ -15,7 +15,7 @@ employee_name = input("Employee name: ")
 hourly_rate = float(input("Hourly pay rate: "))
 hours_worked = float(input("Hours worked this week: "))
 
-# Processing: Weekly paycheck calculations
+# Processing
 gross_pay = hourly_rate * hours_worked
 federal_tax = gross_pay * FEDERAL_TAX_RATE
 state_tax = gross_pay * STATE_TAX_RATE
