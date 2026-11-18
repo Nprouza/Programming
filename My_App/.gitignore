@@ -1,0 +1,4 @@
+harvest.db
+.harvest_secret
+__pycache__/
+*.py[cod]
