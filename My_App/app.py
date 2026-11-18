@@ -13,15 +13,59 @@ import urllib.error
 import urllib.request
 
 
-BG = "#f4f5ef"
-PANEL = "#ffffff"
-PANEL_2 = "#f0f5ed"
-TEXT = "#20352a"
-MUTED = "#77877a"
-ORANGE = "#e77b36"
-GREEN = "#477b50"
-DEEP_GREEN = "#204a33"
-LINE = "#e5ebe2"
+BG = "#0b0d0f"
+PANEL = "#15181b"
+PANEL_2 = "#1d2125"
+TEXT = "#f1f3f5"
+MUTED = "#929aa3"
+ORANGE = "#b9c2ca"
+GREEN = "#d7dde3"
+DEEP_GREEN = "#20262b"
+LINE = "#30363b"
+
+
+class RoundedFrame(tk.Frame):
+    """A frame with a smooth-looking rounded border on Tkinter canvases."""
+
+    def __init__(self, master, radius=18, fill=PANEL, border=LINE, padx=0, pady=0, **kwargs):
+        super().__init__(master, bg=BG, highlightthickness=0, **kwargs)
+        self.radius = radius
+        self.fill = fill
+        self.border = border
+        self.canvas = tk.Canvas(self, bg=BG, highlightthickness=0)
+        self.canvas.pack(fill="both", expand=True)
+        self.content = tk.Frame(self.canvas, bg=fill, padx=padx, pady=pady, highlightthickness=0)
+        self.window = self.canvas.create_window((0, 0), window=self.content, anchor="nw")
+        self.canvas.bind("<Configure>", self._redraw)
+
+    def _rounded_rectangle(self, x1, y1, x2, y2, radius, fill, outline):
+        points = [
+            x1 + radius, y1,
+            x2 - radius, y1,
+            x2, y1,
+            x2, y1 + radius,
+            x2, y2 - radius,
+            x2, y2,
+            x2 - radius, y2,
+            x1 + radius, y2,
+            x1, y2,
+            x1, y2 - radius,
+            x1, y1 + radius,
+            x1, y1,
+        ]
+        return self.canvas.create_polygon(points, smooth=True, splinesteps=24,
+                                          fill=fill, outline=outline, width=1)
+
+    def _redraw(self, event):
+        self.canvas.delete("shape")
+        radius = min(self.radius, event.width // 3, event.height // 3)
+        shape = self._rounded_rectangle(1, 1, event.width - 2, event.height - 2,
+                                         radius, self.fill, self.border)
+        self.canvas.addtag_withtag("shape", shape)
+        self.canvas.lower("shape")
+        self.canvas.coords(self.window, 1, 1)
+        self.canvas.itemconfigure(self.window, width=max(2, event.width - 2),
+                                  height=max(2, event.height - 2))
 
 
 class CalorieTracker:
@@ -78,101 +122,101 @@ class CalorieTracker:
         cards.pack(fill="x", pady=(0, 18))
         cards.grid_columnconfigure(0, weight=7, uniform="summary")
         cards.grid_columnconfigure(1, weight=3, uniform="summary")
-        self.cal_card = tk.Frame(cards, bg=DEEP_GREEN, padx=25, pady=20)
+        self.cal_card = RoundedFrame(cards, radius=22, fill=DEEP_GREEN, border=LINE, padx=25, pady=20)
         self.cal_card.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
-        copy = tk.Frame(self.cal_card, bg=DEEP_GREEN)
+        copy = tk.Frame(self.cal_card.content, bg=DEEP_GREEN)
         copy.pack(side="left", fill="both", expand=True)
-        self._label(copy, "TODAY’S CALORIE BUDGET", 9, "#c1d7c3", "bold", bg=DEEP_GREEN).pack(anchor="w")
+        self._label(copy, "TODAY’S CALORIE BUDGET", 9, MUTED, "bold", bg=DEEP_GREEN).pack(anchor="w")
         value_line = tk.Frame(copy, bg=DEEP_GREEN)
         value_line.pack(anchor="w", pady=(5, 0))
-        self.cal_value = self._label(value_line, "", 39, "#ffffff", "bold", bg=DEEP_GREEN)
+        self.cal_value = self._label(value_line, "", 39, TEXT, "bold", bg=DEEP_GREEN)
         self.cal_value.pack(side="left")
-        self._label(value_line, " kcal left", 12, "#d7e6d8", bg=DEEP_GREEN).pack(side="left", padx=(7, 0), pady=(16, 0))
-        self.cal_note = self._label(copy, "", 10, "#d7e6d8", bg=DEEP_GREEN)
+        self._label(value_line, " kcal left", 12, MUTED, bg=DEEP_GREEN).pack(side="left", padx=(7, 0), pady=(16, 0))
+        self.cal_note = self._label(copy, "", 10, MUTED, bg=DEEP_GREEN)
         self.cal_note.pack(anchor="w", pady=(2, 13))
         self.progress = ttk.Progressbar(copy, style="Harvest.Horizontal.TProgressbar", maximum=100)
         self.progress.pack(fill="x", pady=(0, 7))
         progress_legend = tk.Frame(copy, bg=DEEP_GREEN)
         progress_legend.pack(fill="x")
-        self.progress_note = self._label(progress_legend, "", 9, "#c1d7c3", "bold", bg=DEEP_GREEN)
+        self.progress_note = self._label(progress_legend, "", 9, MUTED, "bold", bg=DEEP_GREEN)
         self.progress_note.pack(side="left")
-        self._label(progress_legend, f"Daily goal  ·  {self.goal:,} kcal", 9, "#c1d7c3", bg=DEEP_GREEN).pack(side="right")
-        ring = tk.Canvas(self.cal_card, width=112, height=112, bg=DEEP_GREEN, highlightthickness=0)
+        self._label(progress_legend, f"Daily goal  ·  {self.goal:,} kcal", 9, MUTED, bg=DEEP_GREEN).pack(side="right")
+        ring = tk.Canvas(self.cal_card.content, width=112, height=112, bg=DEEP_GREEN, highlightthickness=0)
         ring.pack(side="right", padx=(20, 2))
-        ring.create_oval(9, 9, 103, 103, outline="#42694e", width=8)
+        ring.create_oval(9, 9, 103, 103, outline=LINE, width=8)
         self.ring_arc = ring.create_arc(9, 9, 103, 103, start=90, extent=-100,
                                         style="arc", outline=ORANGE, width=8)
-        self.ring_text = ring.create_text(56, 52, text="0%", fill="#ffffff",
-                                          font=("Avenir Next", 17, "bold"))
-        ring.create_text(56, 72, text="EATEN", fill="#c1d7c3", font=("Avenir Next", 7, "bold"))
+        self.ring_text = ring.create_text(56, 52, text="0%", fill=TEXT,
+                                          font=("Segoe UI", 17, "bold"))
+        ring.create_text(56, 72, text="EATEN", fill=MUTED, font=("Segoe UI", 7, "bold"))
         self.cal_ring = ring
 
-        water = tk.Frame(cards, bg=PANEL, padx=19, pady=18)
+        water = RoundedFrame(cards, radius=18, fill=PANEL, border=LINE, padx=19, pady=18)
         water.grid(row=0, column=1, sticky="nsew")
-        water_head = tk.Frame(water, bg=PANEL)
+        water_head = tk.Frame(water.content, bg=PANEL)
         water_head.pack(fill="x")
         self._label(water_head, "WATER", 9, MUTED, "bold").pack(side="left")
         self._label(water_head, "💧", 16, GREEN).pack(side="right")
         self.water_count = 5
-        self.water_value = self._label(water, str(self.water_count), 31, TEXT, "bold")
+        self.water_value = self._label(water.content, str(self.water_count), 31, TEXT, "bold")
         self.water_value.pack(anchor="w", pady=(7, 0))
-        self._label(water, "glasses today", 10, MUTED).pack(anchor="w")
-        self.water_bar = self._mini_bar(water, 62, ORANGE)
-        tk.Button(water, text="＋  Add water", command=self._add_water, bg=PANEL_2, fg=DEEP_GREEN,
-                  activebackground=LINE, activeforeground=DEEP_GREEN, relief="flat", bd=0,
-                  font=("Avenir Next", 9, "bold"), padx=10, pady=6, cursor="hand2").pack(anchor="w", pady=(3, 0))
+        self._label(water.content, "glasses today", 10, MUTED).pack(anchor="w")
+        self.water_bar = self._mini_bar(water.content, 62, ORANGE)
+        tk.Button(water.content, text="＋  Add water", command=self._add_water, bg=PANEL_2, fg=TEXT,
+                  activebackground=LINE, activeforeground=TEXT, relief="flat", bd=0,
+                  font=("Segoe UI", 9, "bold"), padx=10, pady=6, cursor="hand2").pack(anchor="w", pady=(3, 0))
 
         body = tk.Frame(shell, bg=BG)
         body.pack(fill="both", expand=True)
         body.grid_columnconfigure(0, weight=3)
         body.grid_columnconfigure(1, weight=2)
         body.grid_rowconfigure(0, weight=1)
-        log = tk.Frame(body, bg=PANEL, padx=22, pady=20, highlightthickness=1, highlightbackground=LINE)
+        log = RoundedFrame(body, radius=18, fill=PANEL, border=LINE, padx=22, pady=20)
         log.grid(row=0, column=0, sticky="nsew", padx=(0, 12))
-        top = tk.Frame(log, bg=PANEL)
+        top = tk.Frame(log.content, bg=PANEL)
         top.pack(fill="x", pady=(0, 12))
         self._label(top, "Today’s meals", 16, TEXT, "bold").pack(side="left")
         self.count_label = self._label(top, "", 10, MUTED)
         self.count_label.pack(side="right", pady=4)
-        self.entries_frame = tk.Frame(log, bg=PANEL)
+        self.entries_frame = tk.Frame(log.content, bg=PANEL)
         self.entries_frame.pack(fill="both", expand=True)
 
-        add = tk.Frame(body, bg=PANEL, padx=20, pady=20, highlightthickness=1, highlightbackground=LINE)
+        add = RoundedFrame(body, radius=18, fill=PANEL, border=LINE, padx=20, pady=20)
         add.grid(row=0, column=1, sticky="nsew")
-        self._label(add, "Add a meal", 16, TEXT, "bold").pack(anchor="w")
-        self._label(add, "Take a photo for a quick calorie estimate.", 10, MUTED, wraplength=280, justify="left").pack(anchor="w", pady=(4, 14))
-        self.photo_status = tk.Label(add, text="📷\n\nYour meal goes here", bg=PANEL_2,
-                                     fg=MUTED, font=("Avenir Next", 10), justify="center", height=6,
+        self._label(add.content, "Add a meal", 16, TEXT, "bold").pack(anchor="w")
+        self._label(add.content, "Take a photo for a quick calorie estimate.", 10, MUTED, wraplength=280, justify="left").pack(anchor="w", pady=(4, 14))
+        self.photo_status = tk.Label(add.content, text="📷\n\nYour meal goes here", bg=PANEL_2,
+                                     fg=MUTED, font=("Segoe UI", 10), justify="center", height=6,
                                      relief="flat", wraplength=260, highlightthickness=1, highlightbackground=LINE)
         self.photo_status.pack(fill="x", pady=(0, 12))
-        photo_buttons = tk.Frame(add, bg=PANEL)
+        photo_buttons = tk.Frame(add.content, bg=PANEL)
         photo_buttons.pack(fill="x", pady=(0, 12))
         tk.Button(photo_buttons, text="Browse photos", command=self._choose_photo, bg=PANEL_2, fg=TEXT,
                   activebackground=LINE, activeforeground=TEXT, relief="flat", bd=0,
-                  font=("Avenir Next", 9, "bold"), padx=9, pady=7, cursor="hand2").pack(side="left", expand=True, fill="x", padx=(0, 4))
+                  font=("Segoe UI", 9, "bold"), padx=9, pady=7, cursor="hand2").pack(side="left", expand=True, fill="x", padx=(0, 4))
         tk.Button(photo_buttons, text="Take photo", command=self._take_photo, bg=PANEL_2, fg=TEXT,
                   activebackground=LINE, activeforeground=TEXT, relief="flat", bd=0,
-                  font=("Avenir Next", 9, "bold"), padx=9, pady=7, cursor="hand2").pack(side="left", expand=True, fill="x", padx=(4, 0))
-        self.analyze_button = tk.Button(add, text="✦  Analyze my meal", command=self._analyze_photo, bg=DEEP_GREEN, fg="#ffffff",
-                  activebackground="#37683a", activeforeground="#ffffff", relief="flat", bd=0,
-                  font=("Avenir Next", 10, "bold"), padx=10, pady=9, cursor="hand2", state="disabled")
+                  font=("Segoe UI", 9, "bold"), padx=9, pady=7, cursor="hand2").pack(side="left", expand=True, fill="x", padx=(4, 0))
+        self.analyze_button = tk.Button(add.content, text="✦  Analyze my meal", command=self._analyze_photo, bg=TEXT, fg=BG,
+                  activebackground=ORANGE, activeforeground=BG, relief="flat", bd=0,
+                  font=("Segoe UI", 10, "bold"), padx=10, pady=9, cursor="hand2", state="disabled")
         self.analyze_button.pack(fill="x")
-        self.result_frame = tk.Frame(add, bg=PANEL_2, padx=12, pady=10)
+        self.result_frame = tk.Frame(add.content, bg=PANEL_2, padx=12, pady=10)
         self.result_frame.pack(fill="x", pady=(12, 0))
-        self.result_title = self._label(self.result_frame, "", 11, DEEP_GREEN, "bold", wraplength=260, justify="left", bg=PANEL_2)
+        self.result_title = self._label(self.result_frame, "", 11, TEXT, "bold", wraplength=260, justify="left", bg=PANEL_2)
         self.result_title.pack(anchor="w")
         self.result_detail = self._label(self.result_frame, "", 9, MUTED, wraplength=260, justify="left", bg=PANEL_2)
         self.result_detail.pack(anchor="w", pady=(3, 8))
         self.meal_var = tk.StringVar(value="Snack")
-        self._label(add, "MEAL", 9, MUTED, "bold").pack(anchor="w", pady=(9, 5))
-        meal = ttk.Combobox(add, textvariable=self.meal_var, values=["Breakfast", "Lunch", "Dinner", "Snack"],
+        self._label(add.content, "MEAL", 9, MUTED, "bold").pack(anchor="w", pady=(9, 5))
+        meal = ttk.Combobox(add.content, textvariable=self.meal_var, values=["Breakfast", "Lunch", "Dinner", "Snack"],
                             state="readonly", style="Harvest.TCombobox", font=("Avenir Next", 10))
         meal.pack(fill="x", ipady=4, pady=(0, 10))
-        self.add_photo_button = tk.Button(add, text="＋  Add estimated meal", command=self._add_estimated_food, bg=ORANGE, fg="#ffffff",
-                  activebackground="#ff9d60", activeforeground="#20150f", relief="flat", bd=0,
-                  font=("Avenir Next", 10, "bold"), padx=10, pady=9, cursor="hand2", state="disabled")
+        self.add_photo_button = tk.Button(add.content, text="＋  Add estimated meal", command=self._add_estimated_food, bg=ORANGE, fg=BG,
+                  activebackground=TEXT, activeforeground=BG, relief="flat", bd=0,
+                  font=("Segoe UI", 10, "bold"), padx=10, pady=9, cursor="hand2", state="disabled")
         self.add_photo_button.pack(fill="x")
-        self._label(add, "Estimates are approximate. Portion size and hidden ingredients can change the actual calories.",
+        self._label(add.content, "Estimates are approximate. Portion size and hidden ingredients can change the actual calories.",
                     8, MUTED, wraplength=300, justify="left").pack(anchor="w", pady=(10, 0))
         self._label(shell, "Made for mindful meals  ·  ✳", 9, MUTED).pack(anchor="center", pady=(12, 0))
 
