@@ -32,7 +32,7 @@ else:
     if score >= 60:
         print(f"{student_name} passed.")
     else:
-        print("You did not pass.")
+        print(f"{student_name} did not pass.")
 
     if score == 100:
         print("Perfect score!")
