@@ -1,52 +1,32 @@
 # Name: Nick Prouza
-# Date: November 17, 2026
+# Date: November 13, 2026
 # Program Name: SE1
-# Description: Page checker
+# Description: Road Trip Calculator
 
-# Constants
-FEDERAL_TAX_RATE = 0.10
-STATE_TAX_RATE = 0.035
-SOCIAL_SECURITY_RATE = 0.062
-MEDICARE_RATE = 0.0145
-WEEKS_PER_YEAR = 52
+#constants
+AVERAGE_SPEED = 55
 
+#input
+destination = input("Destination: ")
+miles = float(input("Trip distance (miles): "))
+mpg = float(input("Car's miles per gallon: "))
+gas_price = float(input("Gas price per gallon: "))
+people = int(input("Number of people splitting the cost: "))
 
-# Input
-employee_name = input("Employee name: ")
-hourly_rate = float(input("Hourly pay rate: "))
-hours_worked = float(input("Hours worked this week: "))
+#Processing
+gallons = miles / mpg
+gas_cost = gallons * gas_price
+cost_per_person = gas_cost / people
+total_minutes = int(miles / AVERAGE_SPEED * 60)
+hours = total_minutes // 60
+leftover_minutes = total_minutes % 60
+round_trip_gas = gas_cost * 2
 
-# Processing
-gross_pay = hourly_rate * hours_worked
-federal_tax = gross_pay * FEDERAL_TAX_RATE
-state_tax = gross_pay * STATE_TAX_RATE
-social_security = gross_pay * SOCIAL_SECURITY_RATE
-medicare = gross_pay * MEDICARE_RATE
-total_taken_out = federal_tax + state_tax + social_security + medicare
-net_pay = gross_pay - total_taken_out
-percent_kept = (net_pay / gross_pay) * 100
-
-# Processing: Yearly totals
-yearly_gross = gross_pay * WEEKS_PER_YEAR
-yearly_net = net_pay * WEEKS_PER_YEAR
-
-# Output
+#output
 print()
-print("=" * 32)
-print(f"PAY STUB: {employee_name}")
-print("=" * 32)
-print(f"Hours worked:      {hours_worked:.1f}")
-print(f"Hourly rate:       ${hourly_rate:.2f}")
-print(f"Gross pay:         ${gross_pay:.2f}")
-print("-" * 32)
-print(f"Federal tax (10%): ${federal_tax:.2f}")
-print(f"State tax (3.5%):  ${state_tax:.2f}")
-print(f"Social Security:   ${social_security:.2f}")
-print(f"Medicare:          ${medicare:.2f}")
-print(f"Total taken out:   ${total_taken_out:.2f}")
-print("-" * 32)
-print(f"NET PAY:           ${net_pay:.2f}")
-print("=" * 32)
-print(f"You keep {percent_kept:.1f}% of what you earn.")
-print(f"Yearly gross: ${yearly_gross:.2f}")
-print(f"Yearly net:   ${yearly_net:.2f}")
+print(f"--- Tripo to {destination} ---")
+print(f"Gallons of gas:    {gallons:.1f}")
+print(f"Gas cost:          ${gas_cost:.2f}")
+print(f"Cost per person:   ${cost_per_person:.2f}")
+print(f"Driving time:      ${hours} hr {leftover_minutes} min (at {AVERAGE_SPEED} mph)")
+print(f"Round trip gas:    ${round_trip_gas:.2f}")

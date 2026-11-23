@@ -1,30 +1,29 @@
 # Name: Nick Prouza
-# Date: November 13, 2026
+# Date: November 23, 2026
 # Program Name: SE1
-# Description: pizza calculator
+# Snack bar order
 
-#constatnts
-SLICES_PER_PIZZA = 8
-PIZZA_PRICE = 12.99
-SLICE_PRICE = 2.25
+TAX_RATE = 0.07
 
-#Input
-host = input("Host name: ")
-people = int(input("Number of people: "))
-slices_per_person = int(input("Slices per person: "))
+customer_name = input('Customer name: ')
+item = input('Item: ')
+price = float(input('Price: '))
+quantity = int(input('Quantity: '))
 
-#Processing
-total_slices = people * slices_per_person
-whole_pizzas = total_slices// SLICES_PER_PIZZA
-extra_slices = total_slices % SLICES_PER_PIZZA
-total_cost = (whole_pizzas * PIZZA_PRICE) + (extra_slices * SLICE_PRICE)
-cost_per_person = total_cost / people
 
-#Output
+subtotal = price * quantity 
+tax = subtotal * TAX_RATE
+total = subtotal + tax
+
+
 print()
-print(f"=== Pizza Plan for {host}'s party ===")
-print(f"Slices needed:    {total_slices}")
-print(f"WHole pizzas:     {whole_pizzas}")
-print(f"Extra slices:     {extra_slices}")
-print(f"Total cost:       ${total_cost:.2f}")
-print(f"Cost per person:  ${cost_per_person:.2f}")
+print(f'--- Receipt for {customer_name} ---')
+print(f'Item:      {item}')
+print(f'Quantity:  {quantity}')
+print(f'Subtotal:  ${subtotal:.2f}')
+print(f"Tax (7%):  ${tax:.2f}")
+print(f"Total:     ${total:.2f}")
+
+
+
+
